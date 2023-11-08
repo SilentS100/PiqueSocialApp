@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<link href="https://fonts.cdnfonts.com/css/common-pixel" rel="stylesheet">
+                
+<style>
+	@import url('https://fonts.cdnfonts.com/css/common-pixel');
+	
+	.player_css{
+		transform: scale(4);
+        position: absolute;
+		
+	}
+	.pixilate{
+		image-rendering: pixelated;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: crisp-edges;
+	}
+	.fruit_css{
+		transform: scale(6);
+        position: absolute;
+		left: 100px;
+	}
+	.spike_down_css{
+		-webkit-transform: scale(6);
+        transform: scale(6);
+        position: absolute;
+	}
+	.spike_up_css{
+		-webkit-transform: scale(6) scaleY(-1);
+        transform: scale(6) scaleY(-1);
+        position: absolute;
+	}
+	.hitbox{
+		position: absolute;
+		transform: scale(.8);
+		visibility: hidden;
+		
+	}
+	.wall_css{
+		position: absolute;
+		transform: scale(20);
+		z-index: 10;
+	}
+	.para_0_css{
+		transform: scale(20) scaleY(2);
+		position: absolute;
+		filter: brightness(20%)
+	}
+	.para_1_css{
+		transform: scale(15) scaleY(2);
+		position: absolute;
+		filter: brightness(30%)
+	}
+	.para_2_css{
+		transform: scale(10) scaleY(2);
+		position: absolute;
+		filter: brightness(45%)
+		
+	}
+	.flip
+	{
+		transform: scaleY(-1);
+	}
+	.score_css{
+		transform: scale(15);
+		position: absolute;
+		color: rgba(34, 3, 66, 0.507);
+		text-align: center;
+		align-content: center;
+		font-family: 'Common Pixel', sans-serif;
+		                               
+	}
+</style>
+<html>
+	<body onclick="clicked()" style="background-color: rgb(14, 5, 17); position: fixed;"></body>
+	
+	
+	<div id="scene">     
+		<img id="wall_up" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		<img id="wall_down" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		<img id="wall_up2" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		<img id="wall_down2" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		
+		<img id="wall_left" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		<img id="wall_right" class="pixilate wall_css" src="{{ url_for('static',filename='block.png') }}">
+		
+		<img id="para_up_0" class="pixilate para_0_css" src="{{ url_for('static',filename='grounds.png') }}">
+		<img id="para_up_1" class="pixilate para_1_css" src="{{ url_for('static',filename='grounds.png') }}">
+		<img id="para_up_2" class="pixilate para_2_css" src="{{ url_for('static',filename='grounds.png') }}">
+		<img id="para_down_0" class="pixilate para_0_css" src="{{ url_for('static',filename='grounds.png') }}">
+		<img id="para_down_1" class="pixilate para_1_css" src="{{ url_for('static',filename='grounds.png') }}">
+		<img id="para_down_2" class="pixilate para_2_css" src="{{ url_for('static',filename='grounds.png') }}">
+		
+		<img id="spike_up" class="spike_up_css pixilate" src="https://fruity-bat-git-main-silents100.vercel.app/static/spike.png">       
+		<img id="spike_down" class="spike_down_css pixilate" src="https://fruity-bat-git-main-silents100.vercel.app/static/spike.png">
+		
+		<p id="score" class="score_css">0</p>
+	</div>
+
+	<div>     
+		<img id="player_hitbox" class="hitbox pixilate" src="{{ url_for('static',filename='bat_frame_0.png') }}">        
+		<img id="player" class="player_css pixilate" src="{{ url_for('static',filename='bat_frame_0.png') }}">         
+		<img id="player_frame_1" class="player_css pixilate" src="{{ url_for('static',filename='bat_frame_1.png') }}">         
+		<img id="player_frame_2" class="player_css pixilate" src="{{ url_for('static',filename='bat_frame_2.png') }}">         
+	</div>
+
+	<div>     
+		<img id="fruit" class="fruit_css pixilate" src="{{ url_for('static',filename='fruit_0.png') }}">       
+	</div>
+
+	<script>
+		function animate_bat()
+		{	
+			if(flapping)
+			{
+				return;
+			}
+			flapping = true
+			player.style.visibility = "hidden"
+			player_frame_1.style.visibility = "visible"
+			
+			setTimeout(function(){
+				player_frame_1.style.visibility = "hidden"
+				player_frame_2.style.visibility = "visible"
+			
+				setTimeout(function(){
+					player_frame_2.style.visibility = "hidden"
+					player_frame_1.style.visibility = "visible"
+					setTimeout(function(){
+						player_frame_1.style.visibility = "hidden"
+						player.style.visibility = "visible"
+						
+						flapping = false
+					}, 70)		
+				}, 200)
+			}, 70)
+			
+		}
+		document.addEventListener("keydown", keyDownTextField, false);
+		const player    = document.getElementById('player');
+		const player_frame_1    = document.getElementById('player_frame_1');
+		const player_frame_2    = document.getElementById('player_frame_2');
+		player_frame_1.style.visibility = "hidden"
+		player_frame_2.style.visibility = "hidden"
+		const player_hitbox    = document.getElementById('player_hitbox');
+		const fruit     = document.getElementById('fruit')
+		const spike_up  = document.getElementById('spike_up')
+		const spike_down  = document.getElementById('spike_down')
+		const wall_up  = document.getElementById('wall_up')
+		const wall_down  = document.getElementById('wall_down')
+		const wall_up2  = document.getElementById('wall_up2')
+		const wall_down2  = document.getElementById('wall_down2')
+		const wall_left  = document.getElementById('wall_left')
+		const wall_right  = document.getElementById('wall_right')
+		
+		const score_text  = document.getElementById('score')
+
+		const para_up_0  = document.getElementById('para_up_0')
+		const para_up_1  = document.getElementById('para_up_1')
+		const para_up_2  = document.getElementById('para_up_2')
+
+		const para_down_0  = document.getElementById('para_down_0')
+		const para_down_1  = document.getElementById('para_down_1')
+		const para_down_2  = document.getElementById('para_down_2')
+		wall_up.style.top =  window.innerHeight/2 - 630 + "px"
+		wall_down.style.top =  window.innerHeight/2 + 650 + "px"
+		wall_up.style.left   =  "0px"
+		wall_down.style.left =  "0px"
+		wall_up2.style.top =  window.innerHeight/2 - 630 + "px"
+		wall_down2.style.top =  window.innerHeight/2 + 650 + "px"
+		wall_up2.style.left   =  "600px"
+		wall_down2.style.left =  "600px"
+		
+		
+		wall_left.style.transform = "scaleY(100) scaleX(3)"
+		wall_left.style.left = window.innerWidth/2 - 1150 + "px"
+		wall_left.style.top = window.innerHeight/2 - 500 + "px"
+		
+		wall_right.style.transform = "scaleY(100) scaleX(3)"
+		wall_right.style.left = window.innerWidth/2 + 850 + "px"
+		wall_right.style.top = window.innerHeight/2 - 500 + "px"
+		
+		para_up_0.style.top =  window.innerHeight/2 + 300 + "px"
+		para_up_1.style.top =  window.innerHeight/2 + 150 + "px"
+		para_up_2.style.top =  window.innerHeight/2 - 0 + "px"
+	
+		para_down_0.style.top =  window.innerHeight/2 - 300 + "px"
+		para_down_1.style.top =  window.innerHeight/2 - 150 + "px"
+		para_down_2.style.top =  window.innerHeight/2 - 0 + "px"
+
+		para_down_0.style.transform =  "scale(20) scaleY(2) rotate(180deg)";
+		para_down_1.style.transform =  "scale(15) scaleY(2) rotate(180deg)";
+		para_down_2.style.transform =  "scale(10) scaleY(2) rotate(180deg)";
+
+		para_up_0.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		para_up_1.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		para_up_2.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		
+		para_down_0.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		para_down_1.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		para_down_2.style.left = window.innerWidth/2 - 800 - Math.random()*800 + "px";
+		
+		var spikes = []
+		var player_x  = window.innerWidth/2 - 400
+		var player_y  = window.innerHeight/2
+		var player_yv = 3
+		var score = 0
+		var fruit_x = -100
+		var fruit_y = -100
+		var flapping = false
+		score_text.style.left = window.innerWidth/2 + 200 + "px"
+		score_text.style.top = window.innerHeight/2 - 30 + "px"
+		player.style.top = Math.round(player_y) + "px"
+		player.style.left = Math.round(player_x)  + "px"
+		fruit.style.left = Math.round(fruit_x)  + "px"
+		
+		
+		var start = false
+		var end = false
+		spike_up.style.left   = "-2000px"
+		spike_down.style.left = "-2000px"
+
+		function keyDownTextField(e) {
+		var keyCode = e.keyCode;
+		
+		
+		if(keyCode == 32 || keyCode == 87 || keyCode == 38 || keyCode == 89)
+		{
+			if(!start)
+			{
+				start = true
+				var player_y  = window.innerHeight/2
+				score_text.textContent = score
+			}
+			if(!end)
+			{
+				animate_bat()
+				clicked()
+			}
+			
+		}
+		
+		/*
+		//up
+		if(keyCode==38) 
+		{
+			player_y -= 10
+		} 
+		//down
+		if(keyCode==40) 
+		{
+			player_y += 10
+		}
+		//left
+		if(keyCode==37) 
+		{
+			player_x -= 10	
+		}
+		//right
+		if(keyCode==39) 
+		{
+			player_x += 10
+		}
+		*/
+		
+	}
+	function clicked()
+	{
+		if(!start)
+			{
+				start = true
+				var player_y  = window.innerHeight/2
+				score_text.textContent = score
+			}
+			if(!end)
+			{
+				animate_bat()
+				player_yv = -5
+			}	
+	}
+	function reset()
+	{
+		player.style.transform = "scale(4)";
+		player_y  = window.innerHeight/2
+		player_yv = -5
+		score = 0
+		fruit_x = -100
+		
+		for(var i = spikes.length - 1; i > -1; i--){
+			var element = spikes[i]
+			element.remove()
+
+		}
+		spikes = []
+		
+		player.style.top = player_y + "px"
+		player.style.left = player_x  + "px"
+
+		
+		
+		fruit.style.left = fruit_x + "px"
+
+		start = false
+		end = false
+		spike_up.style.top = "1000px"
+		spike_down.style.top = "1000px"
+	}
+	function isCollide(a, b) {
+		var aRect = a.getBoundingClientRect();
+		var bRect = b.getBoundingClientRect();
+
+		var bLeft = bRect.left
+		var bRight = bRect.right
+		if(b.id == "spike_up" || b.id == "spike_down")
+		{
+			bLeft  = bRect.left + 40
+			bRight = bRect.right - 40
+			
+		}
+		var reduce = 30
+		return !((aRect.bottom - reduce < bRect.top) ||
+		(aRect.top + reduce > bRect.bottom) ||
+		(aRect.right - reduce < bLeft) ||
+		(aRect.left + reduce > bRight))
+		
+		
+
+	}
+	function lose()
+	{
+		if(!end)
+		{
+			player.style.transform = "scale(4) scaleY(-1)";
+			player_yv = -5
+			end = true
+		}
+	}
+	setInterval(function(){
+
+		if(start)
+		{
+			player_y += player_yv
+			player_yv += .1
+			if (player_y < window.innerHeight/2 - 320 || player_y > window.innerHeight/2 + 320)
+			{
+				lose()
+			}
+			player.style.top = player_y + "px"
+			player.style.left = player_x  + "px"
+			player_frame_1.style.top = player_y + "px"
+			player_frame_1.style.left = player_x  + "px"
+			player_frame_2.style.top = player_y + "px"
+			player_frame_2.style.left = player_x  + "px"
+			
+			player_hitbox.style.top =  player_y + 10 + "px"
+			player_hitbox.style.left = player_x + 25 + "px"
+		}
+		if(end && player_y > window.innerHeight/2 + 360)
+		{
+			/*
+			if(score === 0)
+			{
+				alert("you got no fruits")
+			}
+			else if(score == 1)
+			{
+				alert("you ate " + score + " fruit")
+			}
+			else{
+				alert("you ate " + score + " fruits")
+			}
+			*/
+			reset()
+		}
+		
+
+	},10)
+	function move_element(element)
+	{
+		var rect = element.getBoundingClientRect();
+		element.style.left = 1
+	}
+	function reset_fruit()
+	{
+		fruit.style.visibility = false
+		fruit_x = window.outerWidth + 30
+		fruit.style.left = fruit_x + "px"
+		fruit_y = Math.random()*200 + window.outerHeight/2 - 100
+		fruit.style.top = fruit_y
+		fruit.src = "static/fruit_" + Math.round(Math.random()*3) + ".png"
+		fruit.style.visibility = true
+	}
+	setInterval(function(){
+		if(!start || end){
+			return
+		}
+		fruit_x -= 3
+		
+		var fRect = fruit.getBoundingClientRect()
+		fruit.style.left =  fruit_x + "px"
+		fruit.style.top = fruit_y + Math.cos(fruit_x / 50) * 50 + "px" 
+		if ( fruit_x < -20 )
+		{	
+			reset_fruit()
+		}
+		if(isCollide(player_hitbox, fruit))
+		{
+			score += 1
+			score_text.textContent = score
+			reset_fruit()
+		}
+		for(var i = spikes.length - 1; i > -1; i--){
+			var element = spikes[i]
+			var rect = element.getBoundingClientRect();
+			element.style.left = rect.left + 32 - score / 4 - 2 + "px"
+			
+			if(rect.left < window.innerWidth/2 - 960){
+				spikes.splice(i, 1);
+				element.remove()
+				
+			}
+			if(isCollide(player_hitbox, element)){
+				lose()
+			}
+		}
+
+		var speed = score/4 + 1 
+		var rect = para_down_0.getBoundingClientRect();
+		var left = rect.left;
+		if( left < -3000)
+		{
+			left += rect.width / 4
+		}
+		para_down_0.style.left = left + 6072 - speed/4 + "px" 
+		para_up_0.style.left = left + 6072 - speed/4 + "px" 
+		
+		var rect = para_down_1.getBoundingClientRect();
+		var left = rect.left;
+		if( left < -3000)
+		{
+			left += rect.width / 4
+		}
+		para_down_1.style.left = left + 4472 - speed/2 + "px" 
+		para_up_1.style.left = left + 4472 - speed/2 + "px" 
+		var rect = para_down_2.getBoundingClientRect();
+		var left = rect.left;
+		if( left < -4000)
+		{
+			left += rect.width / 4
+		}
+		para_down_2.style.left = left + 2872 - speed + "px" 
+		para_up_2.style.left = left + 2872 - speed + "px" 
+		
+	},10)
+
+	
+	function spawn_spike_both()
+	{
+		const clone_down = spike_down.cloneNode(true);
+		const clone_up = spike_up.cloneNode(true);
+		
+		document.getElementById("scene").appendChild(clone_down);
+		document.getElementById("scene").appendChild(clone_up);
+		clone_down.style.visibility = true
+		clone_up.style.visibility = true
+
+		var space  = Math.random() * 80 + 300 
+		var height = Math.random() * 440 - 220
+		clone_down.style.left = window.innerWidth /2 + 800 + Math.random() * 100 - 50 + "px"
+		clone_down.style.top  = window.innerHeight/2 - height + space + "px" 
+		clone_up.style.left   = window.innerWidth /2 + 800 + "px"
+		clone_up.style.top    = window.innerHeight/2 - height - space + "px" 
+		spikes.push(clone_up)
+		spikes.push(clone_down)
+	}
+	/*setInterval(function(){
+		var number = Math.random()*100
+		
+		spawn_spike_both()
+		if(number <= 33)
+		{
+			//spawn_spike_up("low")
+		}
+		else if(number <= 66)
+		{
+			//spawn_spike_down("low")
+		}
+		else if(number <= 100)
+		{
+			//spawn_spike_up("high")
+			//spawn_spike_down("high")
+		}
+	}, 3000 - score * 1000 );
+	*/
+	var spawn_spike_helper = function() {
+		if(start)
+		{
+			spawn_spike_both()
+		}
+		var timeout = 1000 / (Math.sqrt(score/10 + .1)) + 400
+		setTimeout(spawn_spike_helper, timeout);
+	}
+	setTimeout(spawn_spike_helper, 3000);
+	</script>
+
+</html>
+
+

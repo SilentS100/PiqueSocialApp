@@ -1,0 +1,6 @@
+Flask==2.2.2
+pymongo==4.3.3
+flask_discord_interactions==2.1.2
+discord-ext-bot==1.0.1
+discord_webhook==1.1.0
+web3== 5.31.3
